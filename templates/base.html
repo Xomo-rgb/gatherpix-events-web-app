@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}GatherPix{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:   #faf8f4;
+      --warm:    #f3ede3;
+      --blush:   #e8cfc4;
+      --rose:    #c9856a;
+      --rose-dk: #a4634c;
+      --ink:     #1c1412;
+      --ink-lt:  #4a3c38;
+      --muted:   #8c7b76;
+      --white:   #ffffff;
+      --border:  rgba(180,140,120,0.18);
+      --shadow:  0 4px 32px rgba(100,60,40,0.08);
+      --r:       12px;
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.65;
+    }
+
+    h1, h2, h3, .serif { font-family: 'Cormorant Garamond', serif; }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(250,248,244,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+    }
+    .nav-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 600;
+      color: var(--ink); text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+    .nav-brand span { color: var(--rose); }
+    .nav-links { display: flex; gap: 1rem; align-items: center; }
+    .nav-links a { font-size: 0.85rem; color: var(--ink-lt); text-decoration: none; }
+    .nav-links a:hover { color: var(--rose); }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.55rem 1.4rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 500;
+      border-radius: 40px; cursor: pointer;
+      transition: all 0.2s; border: none; text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--rose); color: white;
+    }
+    .btn-primary:hover { background: var(--rose-dk); transform: translateY(-1px); }
+    .btn-outline {
+      background: transparent; color: var(--ink);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--rose); color: var(--rose); }
+    .btn-danger { background: #c0392b; color: white; }
+    .btn-danger:hover { background: #a93226; }
+    .btn-sm { padding: 0.35rem 0.9rem; font-size: 0.78rem; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+    }
+
+    /* ── Forms ── */
+    .form-group { margin-bottom: 1.2rem; }
+    label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+    input[type=text], input[type=email], input[type=password], input[type=date] {
+      width: 100%; padding: 0.65rem 1rem;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+      background: var(--cream); color: var(--ink);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    input:focus { border-color: var(--rose); background: var(--white); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 9999;
+      padding: 0.8rem 1.4rem; border-radius: 40px;
+      font-size: 0.85rem; font-weight: 500;
+      background: var(--ink); color: white;
+      opacity: 0; transform: translateY(8px);
+      transition: all 0.3s; pointer-events: none;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.success { background: #27ae60; }
+    #toast.error { background: #c0392b; }
+
+    /* ── Utility ── */
+    .text-muted { color: var(--muted); }
+    .text-center { text-align: center; }
+    .mt-1 { margin-top: 0.5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .mt-3 { margin-top: 1.5rem; }
+    .mt-4 { margin-top: 2rem; }
+
+    @media (max-width: 600px) {
+      nav { padding: 0 1rem; }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <nav>
+    <a class="nav-brand" href="/"><span>✦</span> GatherPix</a>
+    <div class="nav-links" id="nav-links">
+      <a href="/login" id="nav-login">Log in</a>
+      <a href="/register" class="btn btn-primary btn-sm" id="nav-register">Create event</a>
+    </div>
+  </nav>
+
+  {% block content %}{% endblock %}
+
+  <div id="toast"></div>
+
+  <script>
+    function toast(msg, type = "success") {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.className = "show " + type;
+      setTimeout(() => t.className = "", 3000);
+    }
+
+    async function checkAuth() {
+      const res = await fetch("/api/me");
+      const data = await res.json();
+      const nav = document.getElementById("nav-links");
+      if (data.authenticated) {
+        nav.innerHTML = `
+          <a href="/dashboard">Dashboard</a>
+          <button class="btn btn-outline btn-sm" onclick="logout()">Log out</button>
+        `;
+      }
+    }
+    async function logout() {
+      await fetch("/api/logout", { method: "POST" });
+      location.href = "/";
+    }
+    checkAuth();
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

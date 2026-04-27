@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Log in — GatherPix{% endblock %}
+
+{% block extra_head %}
+<style>
+  .auth-wrap {
+    min-height: calc(100vh - 60px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem 1rem;
+  }
+  .auth-box {
+    width: 100%; max-width: 420px;
+    padding: 2.5rem;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    box-shadow: var(--shadow);
+  }
+  .auth-title { font-size: 2rem; font-weight: 300; margin-bottom: 0.4rem; }
+  .auth-sub { font-size: 0.875rem; color: var(--muted); margin-bottom: 2rem; }
+  .auth-footer { text-align: center; font-size: 0.82rem; color: var(--muted); margin-top: 1.5rem; }
+  .auth-footer a { color: var(--rose); text-decoration: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-box">
+    <h1 class="auth-title serif">Welcome back</h1>
+    <p class="auth-sub">Log in to manage your GatherPix events</p>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="you@example.com" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••" />
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:0.5rem" onclick="doLogin()">
+      Log in
+    </button>
+    <p class="auth-footer">No account? <a href="/register">Create one</a></p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function doLogin() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  if (!email || !password) { toast("Please fill in all fields", "error"); return; }
+  const res = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json();
+  if (res.ok) { location.href = "/dashboard"; }
+  else { toast(data.error || "Login failed", "error"); }
+}
+document.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+</script>
+{% endblock %}

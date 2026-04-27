@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}GatherPix — Event Photo & Video Sharing{% endblock %}
+
+{% block extra_head %}
+<style>
+  .hero {
+    min-height: calc(100vh - 60px);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 4rem 1.5rem;
+    background: radial-gradient(ellipse at 60% 30%, #f3e8e0 0%, var(--cream) 70%);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9856a' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .hero-tag {
+    font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--rose); font-weight: 500; margin-bottom: 1.2rem;
+  }
+  .hero h1 {
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 300; line-height: 1.05;
+    color: var(--ink); margin-bottom: 1.4rem;
+  }
+  .hero h1 em { color: var(--rose); font-style: italic; }
+  .hero p {
+    font-size: 1.05rem; color: var(--ink-lt);
+    max-width: 480px; margin: 0 auto 2.5rem;
+    line-height: 1.75;
+  }
+  .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .hero-cta .btn { padding: 0.75rem 2rem; font-size: 0.9rem; }
+
+  .how-it-works {
+    padding: 5rem 2rem;
+    max-width: 900px; margin: 0 auto;
+  }
+  .section-label {
+    font-size: 0.75rem; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--rose);
+    font-weight: 500; margin-bottom: 0.5rem;
+  }
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 300; color: var(--ink);
+    margin-bottom: 3rem;
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+  }
+  .step {
+    padding: 1.8rem;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+  }
+  .step-num {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--blush); color: var(--rose-dk);
+    font-size: 0.85rem; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1rem;
+  }
+  .step h3 { font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 400; }
+  .step p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+
+  .cta-band {
+    background: var(--ink);
+    color: white; text-align: center;
+    padding: 4rem 2rem;
+  }
+  .cta-band h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 300; margin-bottom: 1rem; color: white;
+  }
+  .cta-band p { color: rgba(255,255,255,0.65); margin-bottom: 2rem; }
+  .cta-band .btn-primary { background: var(--rose); }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="hero-tag">Event photo and short video sharing</p>
+  <h1>Every moment,<br><em>beautifully shared</em></h1>
+  <p>Create a unique QR code for your event. Guests scan it, upload photos or short videos instantly — no accounts and no friction.</p>
+  <div class="hero-cta">
+    <a href="/register" class="btn btn-primary">Create your event</a>
+    <a href="/login" class="btn btn-outline">Owner login</a>
+  </div>
+</section>
+
+<section class="how-it-works">
+  <p class="section-label">How it works</p>
+  <h2 class="section-title serif">Simple for you.<br>Effortless for guests.</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Create your event</h3>
+      <p>Register, name your event, and get a unique shareable link and QR code in seconds.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Share the QR code</h3>
+      <p>Print it on table cards, display it at the venue, or send the link digitally. Guests need no app or account.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Guests upload photos</h3>
+      <p>Scan → upload. That's it. Photos are stored securely in Cloudinary the moment they're taken.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h3>You control everything</h3>
+      <p>View, download, share, or delete any photo from your owner dashboard. Full control, always yours.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <h2 class="serif">Ready to capture your day?</h2>
+  <p>Create your event in under a minute. Free to get started.</p>
+  <a href="/register" class="btn btn-primary">Get started →</a>
+</section>
+{% endblock %}

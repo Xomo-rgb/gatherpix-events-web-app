@@ -1,0 +1,7 @@
+flask==3.0.3
+flask-cors==4.0.1
+pg8000==1.30.3
+cloudinary==1.44.2
+qrcode[pil]==7.4.2
+python-dotenv==1.0.1
+requests==2.32.3
