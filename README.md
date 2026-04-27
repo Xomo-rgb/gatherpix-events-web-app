@@ -1,79 +1,43 @@
-GatherPix
+# GatherPix
 
 A simple web app where guests scan a QR code and upload photos or short videos to a shared event gallery.
 
-🚀 Tech Stack
-Backend: Flask (Python)
-Database: PostgreSQL (Supabase)
-Storage: Cloudinary
-Frontend: HTML, Jinja2, JavaScript
-📁 Project Structure
-wedding_app/
-├── app.py
-├── schema.sql
-├── requirements.txt
-├── .env.example
-└── templates/
-⚙️ Setup
-1. Install
-git clone <your-repo>
-cd wedding_app
-python -m venv venv
-venv\Scripts\activate   # or source venv/bin/activate
-pip install -r requirements.txt
-2. Supabase (Database)
-Create a project on https://supabase.com
-Go to Settings → Database
-Reset your password (if needed)
-Run schema.sql in the SQL editor
-3. Cloudinary (Media Storage)
-Sign up at https://cloudinary.com
-Copy:
-Cloud name
-API key
-API secret
-4. Environment Variables
+---
 
-Create .env:
+## Features
+- Event creation by owners
+- QR code generation for events
+- Guest photo and video uploads
+- No login required for guests
+- Media gallery for event owners
 
-SECRET_KEY=your_secret_key
+---
 
-DB_HOST=your_host
-DB_USER=postgres
-DB_PASSWORD=your_password
-DB_NAME=postgres
-DB_PORT=5432
+## How it works
 
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-5. Run
-python app.py
+### Event owners
+- Create an event
+- Share QR code with guests
+- View and manage uploads
 
-Open: http://localhost:5000
+### Guests
+- Scan QR code
+- Upload photos or videos instantly
 
-📸 How It Works
-Event Owners
-Create an account
-Create events
-Get a QR code
-View, download, or delete uploads
-Guests
-Scan QR code
-Upload photos or short videos
-No login required
-🔐 Permissions
-Guests → upload only
-Owners → full control
-💡 Notes
-Media is stored in Cloudinary
-Database stores only metadata + URLs
-Easy to switch storage providers later
-🛠️ Future Ideas
-Co-owner support
-Photo moderation
-Event PIN
-Notifications
-🔒 Security
-Use bcrypt instead of SHA-256 for passwords
-Don’t commit .env
+---
+
+## Tech Stack
+- Backend: Flask (Python)
+- Database: PostgreSQL (Supabase)
+- Storage: Cloudinary
+- Frontend: HTML, Jinja2, JavaScript
+
+---
+
+## About
+A lightweight event-based media sharing app designed for weddings and events where guests can contribute memories instantly.
+
+---
+
+## Contributors
+- Chisomo Kanzengo (Xomo-rgb)
