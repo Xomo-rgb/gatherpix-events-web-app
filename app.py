@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for, send_file
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from functools import wraps
 import pg8000
 import cloudinary
@@ -8,19 +10,27 @@ import qrcode
 import io
 import os
 import uuid
-import hashlib
+import bcrypt
 import re
 import random
 import string
+import requests
+import zipfile
 from datetime import datetime
 from dotenv import load_dotenv
-import zipfile
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "change-this-in-production")
 CORS(app)
+
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per hour"],
+    storage_uri="memory://"
+)
 
 # ─── Cloudinary Init ─────────────────────────────────────────────────────────
 cloudinary.config(
@@ -32,12 +42,17 @@ cloudinary.config(
 
 # ─── DB Connection ───────────────────────────────────────────────────────────
 def get_db():
+    import ssl
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
     return pg8000.connect(
         host=os.getenv("DB_HOST", "localhost"),
         user=os.getenv("DB_USER", "root"),
         password=os.getenv("DB_PASSWORD", ""),
         database=os.getenv("DB_NAME", "wedding_app"),
-        port=int(os.getenv("DB_PORT", "5432"))
+        port=int(os.getenv("DB_PORT", "5432")),
+        ssl_context=ssl_context
     )
 
 def row_to_dict(cursor, row):
@@ -47,7 +62,10 @@ def row_to_dict(cursor, row):
     return {cursor.description[i][0]: row[i] for i in range(len(row))}
 
 def hash_password(pw):
-    return hashlib.sha256(pw.encode()).hexdigest()
+    return bcrypt.hashpw(pw.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def verify_password(pw, hashed):
+    return bcrypt.checkpw(pw.encode('utf-8'), hashed.encode('utf-8'))
 
 def slugify(text):
     text = text.lower().strip()
@@ -112,7 +130,7 @@ def dashboard():
 def event_upload_page(event_slug):
     db = get_db()
     cur = db.cursor()
-    cur.execute("SELECT id, name, couple_names, event_date, cover_image_url FROM events WHERE slug=%s", (event_slug,))
+    cur.execute("SELECT id, name, couple_names, event_date, cover_image_url, welcome_message, welcome_tagline, upload_limit_mb FROM events WHERE slug=%s", (event_slug,))
     event = row_to_dict(cur, cur.fetchone())
     cur.close(); db.close()
     if not event:
@@ -167,14 +185,14 @@ def login():
     password = data.get("password", "")
     db = get_db()
     cur = db.cursor()
-    cur.execute("SELECT id, name FROM users WHERE email=%s AND password_hash=%s",
-                (email, hash_password(password)))
+    cur.execute("SELECT id, name, password_hash FROM users WHERE email=%s", (email,))
     user = cur.fetchone()
     cur.close(); db.close()
-    if not user:
+    if not user or not verify_password(password, user[2]):
         return jsonify({"error": "Invalid credentials"}), 401
     session["user_id"] = user[0]
     session["user_name"] = user[1]
+    session.permanent = True
     return jsonify({"success": True})
 
 @app.route("/api/logout", methods=["POST"])
@@ -237,9 +255,12 @@ def create_event():
         if not cur.fetchone():
             break
         access_code = generate_access_code()
+    welcome_message = data.get("welcome_message", "").strip()[:160] or None
+    welcome_tagline = data.get("welcome_tagline", "").strip()[:255] or None
+    upload_limit_mb = int(data.get("upload_limit_mb") or 200)
     cur.execute(
-        "INSERT INTO events (user_id, name, couple_names, event_date, slug, access_code) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id",
-        (session["user_id"], name, couple_names, event_date or None, slug, access_code)
+        "INSERT INTO events (user_id, name, couple_names, event_date, slug, access_code, welcome_message, welcome_tagline, upload_limit_mb) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id",
+        (session["user_id"], name, couple_names, event_date or None, slug, access_code, welcome_message, welcome_tagline, upload_limit_mb)
     )
     event_id = cur.fetchone()[0]
     db.commit()
@@ -281,11 +302,11 @@ def delete_event(event_slug):
         cur.close(); db.close()
         return jsonify({"error": "Not found"}), 404
     # Delete all photos from Cloudinary
-    cur.execute("SELECT firebase_path FROM photos WHERE event_id=%s", (event[0],))
+    cur.execute("SELECT cloudinary_public_id, resource_type FROM photos WHERE event_id=%s", (event[0],))
     photos = cur.fetchall()
     for photo in photos:
         try:
-            cloudinary.uploader.destroy(photo[0], resource_type="image", invalidate=True)
+            cloudinary.uploader.destroy(photo[0], resource_type=photo[1] or "image", invalidate=True)
         except Exception:
             pass
     cur.execute("DELETE FROM photos WHERE event_id=%s", (event[0],))
@@ -305,7 +326,9 @@ def get_qr(event_slug):
         cur.close(); db.close()
         return jsonify({"error": "Not found"}), 404
     cur.close(); db.close()
-    base_url = os.getenv("APP_BASE_URL", request.host_url.rstrip("/"))
+    base_url = os.getenv("APP_BASE_URL") or request.host_url.rstrip("/")
+    if not base_url.startswith("https://") and not base_url.startswith("http://localhost"):
+        base_url = base_url.replace("http://", "https://")
     event_url = f"{base_url}/event/{event_slug}"
     qr = qrcode.QRCode(version=1, box_size=10, border=4,
                        error_correction=qrcode.constants.ERROR_CORRECT_H)
@@ -329,7 +352,7 @@ def get_photos(event_slug):
         cur.close(); db.close()
         return jsonify({"error": "Event not found"}), 404
     cur.execute("""
-        SELECT id, image_url, uploader_name, upload_timestamp
+        SELECT id, image_url, uploader_name, upload_timestamp, resource_type
         FROM photos WHERE event_id=%s ORDER BY upload_timestamp DESC
     """, (event[0],))
     photos = [row_to_dict(cur, row) for row in cur.fetchall()]
@@ -342,6 +365,7 @@ def get_photos(event_slug):
     return jsonify(photos)
 
 @app.route("/api/events/<event_slug>/photos/upload", methods=["POST"])
+@limiter.limit("10 per minute")
 def upload_photo(event_slug):
     db = get_db()
     cur = db.cursor()
@@ -371,7 +395,15 @@ def upload_photo(event_slug):
     else:
         cur.close(); db.close()
         return jsonify({"error": "Only image and short video files allowed"}), 400
-    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ("jpg" if resource_type == "image" else "mp4")
+    # Enforce per-guest upload limit
+    cur.execute("SELECT upload_limit_mb FROM events WHERE id=%s", (event[0],))
+    limit_mb = (cur.fetchone() or [200])[0]
+    cur.execute("SELECT COALESCE(SUM(file_size),0) FROM photos WHERE event_id=%s AND uploader_name=%s", (event[0], uploader_name))
+    used_bytes = cur.fetchone()[0]
+    if used_bytes + file_size > limit_mb * 1024 * 1024:
+        cur.close(); db.close()
+        remaining_mb = max(0, round((limit_mb * 1024 * 1024 - used_bytes) / (1024 * 1024), 1))
+        return jsonify({"error": f"Upload limit reached. You have {remaining_mb} MB remaining."}), 400
     public_id = f"events/{event_slug}/{uuid.uuid4().hex}"
     upload_result = cloudinary.uploader.upload(
         file,
@@ -387,8 +419,8 @@ def upload_photo(event_slug):
             return jsonify({"error": "Videos must be 15 seconds or shorter"}), 400
     image_url = upload_result.get("secure_url") or upload_result.get("url")
     cur.execute(
-        "INSERT INTO photos (event_id, image_url, firebase_path, uploader_name) VALUES (%s,%s,%s,%s) RETURNING id",
-        (event[0], image_url, public_id, uploader_name)
+        "INSERT INTO photos (event_id, image_url, cloudinary_public_id, uploader_name, resource_type, file_size) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id",
+        (event[0], image_url, public_id, uploader_name, resource_type, file_size)
     )
     photo_id = cur.fetchone()[0]
     db.commit()
@@ -408,14 +440,14 @@ def delete_photo(event_slug, photo_id):
     if "user_id" not in session:
         cur.close(); db.close()
         return jsonify({"error": "Unauthorized"}), 401
-    cur.execute("SELECT id, firebase_path FROM photos WHERE id=%s AND event_id=%s",
+    cur.execute("SELECT id, cloudinary_public_id, resource_type FROM photos WHERE id=%s AND event_id=%s",
                 (photo_id, event[0]))
     photo = cur.fetchone()
     if not photo:
         cur.close(); db.close()
         return jsonify({"error": "Photo not found"}), 404
     try:
-        cloudinary.uploader.destroy(photo[1], resource_type="image", invalidate=True)
+        cloudinary.uploader.destroy(photo[1], resource_type=photo[2] or "image", invalidate=True)
     except Exception:
         pass
     cur.execute("DELETE FROM photos WHERE id=%s", (photo_id,))
@@ -433,15 +465,14 @@ def download_all_photos(event_slug):
     if not event:
         cur.close(); db.close()
         return jsonify({"error": "Not authorized"}), 403
-    cur.execute("SELECT firebase_path, uploader_name, upload_timestamp FROM photos WHERE event_id=%s",
+    cur.execute("SELECT image_url, uploader_name, upload_timestamp FROM photos WHERE event_id=%s",
                 (event[0],))
     photos = [row_to_dict(cur, row) for row in cur.fetchall()]
     cur.close(); db.close()
-    import requests as req_lib
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
         for i, photo in enumerate(photos):
-            response = req_lib.get(photo["image_url"], timeout=15)
+            response = requests.get(photo["image_url"], timeout=15)
             response.raise_for_status()
             img_bytes = response.content
             ext = photo["image_url"].rsplit(".", 1)[-1].split("?")[0]

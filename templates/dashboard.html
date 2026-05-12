@@ -3,116 +3,285 @@
 
 {% block extra_head %}
 <style>
-  .dash-wrap { max-width: 1000px; margin: 0 auto; padding: 2.5rem 1.5rem; }
-  .dash-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem; }
-  .dash-title { font-size: 2.2rem; font-weight: 300; }
-  .dash-title span { color: var(--muted); font-size: 1rem; font-family: 'DM Sans', sans-serif; display: block; }
+  .page { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+  /* ── Header ── */
+  .page-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.4rem; font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.2rem;
+  }
+  .page-header p { font-size: 0.9rem; color: var(--ink2); }
+
+  /* ── Section ── */
+  .section { margin-bottom: 3rem; }
+  .section-title {
+    font-size: 0.78rem; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--sub);
+    margin-bottom: 1rem;
+  }
 
   /* ── Create form ── */
-  .create-card {
-    background: var(--white);
+  .form-card {
+    background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--r);
-    padding: 1.8rem 2rem;
-    margin-bottom: 2.5rem;
+    border-radius: 10px;
+    padding: 1.75rem;
   }
-  .create-card h2 { font-size: 1.2rem; font-weight: 400; margin-bottom: 1.2rem; }
-  .create-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: end; }
-  @media (max-width: 600px) { .create-grid { grid-template-columns: 1fr; } }
+  .form-row { display: grid; gap: 1rem; margin-bottom: 1rem; }
+  .form-row.c3 { grid-template-columns: 1fr 1fr 1fr; }
+  .form-row.c2 { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 640px) {
+    .form-row.c3, .form-row.c2 { grid-template-columns: 1fr; }
+  }
+  .form-row:last-of-type { margin-bottom: 0; }
+  .field label {
+    display: block;
+    font-size: 0.82rem; font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 0.35rem;
+  }
+  .field label span { font-weight: 400; color: var(--sub); }
+  .field input {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    background: var(--bg);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus { border-color: var(--accent); background: #fff; }
+  .field input::placeholder { color: #a89080; }
+  .form-sep { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+  .btn-create {
+    margin-top: 1.25rem;
+    padding: 0.7rem 1.75rem;
+    background: var(--ink); color: #fff;
+    border: none; border-radius: 7px;
+    font-size: 0.88rem; font-weight: 500;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-create:hover { background: var(--ink2); }
 
-  /* ── Events grid ── */
-  .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.2rem; }
+  /* ── Join form ── */
+  .join-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem 1.75rem;
+    display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;
+  }
+  .join-card .field { flex: 1; min-width: 160px; margin: 0; }
+  .btn-join {
+    padding: 0.65rem 1.4rem;
+    background: var(--surface); color: var(--ink);
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    font-size: 0.88rem; font-weight: 500;
+    cursor: pointer; transition: border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .btn-join:hover { border-color: var(--accent); color: var(--accent2); }
+
+  /* ── Event cards ── */
+  .events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
   .event-card {
-    background: var(--white);
+    background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--r);
+    border-radius: 10px;
     overflow: hidden;
-    transition: box-shadow 0.2s, transform 0.2s;
+    display: flex; flex-direction: column;
+    transition: box-shadow 0.2s;
   }
-  .event-card:hover { box-shadow: 0 8px 32px rgba(100,60,40,0.12); transform: translateY(-2px); }
-  .event-card-body { padding: 1.4rem; }
-  .event-name { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; margin-bottom: 0.25rem; }
-  .event-meta { font-size: 0.8rem; color: var(--muted); margin-bottom: 1rem; }
-  .event-slug {
-    font-size: 0.75rem; background: var(--cream);
-    padding: 0.3rem 0.65rem; border-radius: 20px;
-    color: var(--ink-lt); display: inline-block; margin-bottom: 1rem;
-    font-family: monospace;
+  .event-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .ec-body { padding: 1.4rem; flex: 1; }
+  .ec-date {
+    font-size: 0.75rem; font-weight: 500;
+    color: var(--sub);
+    margin-bottom: 0.4rem;
+    text-transform: uppercase; letter-spacing: 0.06em;
   }
-  .event-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-  .photo-count { font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem; }
+  .ec-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+  }
+  .ec-hosts { font-size: 0.85rem; color: var(--ink2); margin-bottom: 1rem; }
+  .ec-count {
+    font-size: 0.8rem; color: var(--sub);
+    background: var(--bg);
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+  }
+  .ec-footer {
+    padding: 0.9rem 1.4rem;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 0.5rem; align-items: center;
+  }
+  .ec-btn {
+    padding: 0.42rem 0.9rem;
+    border-radius: 6px;
+    font-size: 0.8rem; font-weight: 500;
+    cursor: pointer; text-decoration: none;
+    border: none; transition: all 0.15s;
+    display: inline-flex; align-items: center;
+  }
+  .ec-btn-dark { background: var(--ink); color: #fff; }
+  .ec-btn-dark:hover { background: var(--ink2); }
+  .ec-btn-outline { background: transparent; color: var(--ink); border: 1.5px solid var(--border); }
+  .ec-btn-outline:hover { border-color: var(--accent); color: var(--accent2); }
+  .ec-btn-del { background: transparent; color: #b04040; border: 1.5px solid #e8d0d0; margin-left: auto; }
+  .ec-btn-del:hover { background: #fdf0f0; }
 
-  /* ── QR modal ── */
-  .modal-overlay {
+  /* ── QR Modal ── */
+  .modal-bg {
     position: fixed; inset: 0; z-index: 500;
-    background: rgba(28,20,18,0.6);
+    background: rgba(26,20,16,0.5);
     display: none; align-items: center; justify-content: center;
     padding: 1rem;
   }
-  .modal-overlay.open { display: flex; }
-  .modal-box {
-    background: var(--white); border-radius: var(--r);
-    padding: 2.5rem; max-width: 360px; width: 100%;
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 320px; width: 100%;
     text-align: center;
     box-shadow: 0 20px 60px rgba(0,0,0,0.2);
   }
-  .modal-box h2 { font-size: 1.4rem; margin-bottom: 0.3rem; font-weight: 300; }
-  .modal-box p { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.5rem; }
-  .modal-box img { width: 220px; height: 220px; border-radius: 8px; border: 1px solid var(--border); }
-  .modal-actions { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.2rem; flex-wrap: wrap; }
-  .copy-link { font-size: 0.75rem; color: var(--rose); cursor: pointer; margin-top: 0.75rem; display: block; }
-  .empty-state { text-align: center; padding: 4rem 1rem; color: var(--muted); }
-  .empty-state h3 { font-size: 1.5rem; font-weight: 300; margin-bottom: 0.5rem; }
+  .modal h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 400;
+    color: var(--ink); margin-bottom: 0.25rem;
+  }
+  .modal p { font-size: 0.82rem; color: var(--ink2); margin-bottom: 1.25rem; }
+  .modal img { width: 190px; height: 190px; border-radius: 6px; border: 1px solid var(--border); }
+  .modal-copy {
+    display: block; margin-top: 0.75rem;
+    font-size: 0.8rem; color: var(--accent);
+    cursor: pointer; text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .modal-actions { display: flex; gap: 0.6rem; justify-content: center; margin-top: 1.25rem; }
+  .modal-btn {
+    padding: 0.5rem 1.1rem; border-radius: 6px;
+    font-size: 0.82rem; font-weight: 500;
+    cursor: pointer; text-decoration: none; border: none;
+    transition: all 0.15s;
+  }
+  .modal-btn-dark { background: var(--ink); color: #fff; }
+  .modal-btn-dark:hover { background: var(--ink2); }
+  .modal-btn-outline { background: transparent; color: var(--ink); border: 1.5px solid var(--border); }
+  .modal-btn-outline:hover { border-color: var(--accent); }
+
+  /* ── Empty ── */
+  .empty {
+    text-align: center; padding: 4rem 1rem; color: var(--sub);
+  }
+  .empty h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem; font-weight: 400;
+    color: var(--ink); margin-bottom: 0.5rem;
+  }
+  .empty p { font-size: 0.88rem; color: var(--ink2); }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="dash-wrap">
-  <div class="dash-header">
-    <div class="dash-title serif">
-      Your events
-      <span id="greeting">Loading…</span>
+<div class="page">
+
+  <div class="page-header">
+    <h1 id="greeting">Your events</h1>
+    <p id="greeting-sub">Loading…</p>
+  </div>
+
+  <!-- Create event -->
+  <div class="section">
+    <div class="section-title">Create a new event</div>
+    <div class="form-card">
+      <div class="form-row c3">
+        <div class="field">
+          <label for="new-name">Event name *</label>
+          <input type="text" id="new-name" placeholder="Grace & John's Wedding" />
+        </div>
+        <div class="field">
+          <label for="new-couple">Host / couple names</label>
+          <input type="text" id="new-couple" placeholder="Grace & John" />
+        </div>
+        <div class="field">
+          <label for="new-date">Date</label>
+          <input type="date" id="new-date" />
+        </div>
+      </div>
+      <hr class="form-sep" />
+      <div class="form-row c2">
+        <div class="field">
+          <label for="new-welcome">Welcome message <span>— shown to guests</span></label>
+          <input type="text" id="new-welcome" placeholder="Welcome to Grace & John's Wedding" maxlength="160" />
+        </div>
+        <div class="field">
+          <label for="new-tagline">Tagline <span>— optional</span></label>
+          <input type="text" id="new-tagline" placeholder="Share your favourite moments from today" maxlength="255" />
+        </div>
+      </div>
+      <button class="btn-create" onclick="createEvent()">Create event →</button>
     </div>
   </div>
 
-  <!-- Create event form -->
-  <div class="create-card">
-    <h2>Create a new event</h2>
-    <div class="create-grid">
-      <div class="form-group" style="margin-bottom:0">
-        <label>Event name *</label>
-        <input type="text" id="new-name" placeholder="Summer Birthday Party" />
+  <!-- Join event -->
+  <div class="section">
+    <div class="section-title">Join an existing event as co-owner</div>
+    <div class="join-card">
+      <div class="field">
+        <label for="join-slug">Event link slug</label>
+        <input type="text" id="join-slug" placeholder="grace-and-johns-wedding" />
       </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label>Host / names</label>
-        <input type="text" id="new-couple" placeholder="Alex & Maya" />
+      <div class="field">
+        <label for="join-code">Access code</label>
+        <input type="text" id="join-code" placeholder="ABC12345" style="text-transform:uppercase" />
       </div>
-      <div>
-        <label>Date</label>
-        <input type="date" id="new-date" />
-      </div>
+      <button class="btn-join" onclick="joinEvent()">Join event</button>
     </div>
-    <button class="btn btn-primary mt-2" onclick="createEvent()">Create event →</button>
   </div>
 
   <!-- Events list -->
-  <div id="events-container">
-    <div class="empty-state">
-      <h3 class="serif">Loading events…</h3>
+  <div class="section">
+    <div class="section-title">All events</div>
+    <div id="events-container">
+      <div class="empty"><h3>Loading…</h3></div>
     </div>
   </div>
+
 </div>
 
 <!-- QR Modal -->
-<div class="modal-overlay" id="qr-modal" onclick="closeQR(event)">
-  <div class="modal-box">
-    <h2 class="serif" id="qr-event-name">Event QR Code</h2>
-    <p>Display or print this code at your venue</p>
+<div class="modal-bg" id="qr-modal" onclick="closeQR(event)">
+  <div class="modal">
+    <h2 id="qr-name"></h2>
+    <p>Display or print this at your venue</p>
     <img id="qr-img" src="" alt="QR Code" />
-    <span class="copy-link" id="qr-link-copy" onclick="copyLink()">Copy event link</span>
+    <span class="modal-copy" onclick="copyLink()">Copy guest link</span>
     <div class="modal-actions">
-      <a id="qr-download" class="btn btn-primary" download>Download QR</a>
-      <button class="btn btn-outline" onclick="document.getElementById('qr-modal').classList.remove('open')">Close</button>
+      <a id="qr-dl" class="modal-btn modal-btn-dark" download>Download</a>
+      <button class="modal-btn modal-btn-outline" onclick="document.getElementById('qr-modal').classList.remove('open')">Close</button>
     </div>
   </div>
 </div>
@@ -120,12 +289,13 @@
 
 {% block scripts %}
 <script>
-let currentQrSlug = "";
+let currentSlug = "";
 
 async function loadDash() {
   const me = await fetch("/api/me").then(r => r.json());
   if (!me.authenticated) { location.href = "/login"; return; }
-  document.getElementById("greeting").textContent = `Welcome back, ${me.name}`;
+  document.getElementById("greeting").textContent = "Your events";
+  document.getElementById("greeting-sub").textContent = `Welcome back, ${me.name}`;
   loadEvents();
 }
 
@@ -133,76 +303,89 @@ async function loadEvents() {
   const res = await fetch("/api/events");
   if (!res.ok) { location.href = "/login"; return; }
   const events = await res.json();
-  const container = document.getElementById("events-container");
-  if (events.length === 0) {
-    container.innerHTML = `<div class="empty-state"><h3 class="serif">No events yet</h3><p>Create your first event above to get started.</p></div>`;
+  const c = document.getElementById("events-container");
+  if (!events.length) {
+    c.innerHTML = `<div class="empty"><h3>No events yet</h3><p>Create your first event above to get started.</p></div>`;
     return;
   }
-  container.innerHTML = `<div class="events-grid">${events.map(renderEventCard).join("")}</div>`;
+  c.innerHTML = `<div class="events-grid">${events.map(renderCard).join("")}</div>`;
 }
 
-function renderEventCard(e) {
-  const date = e.event_date ? new Date(e.event_date).toLocaleDateString("en-GB", {day:"numeric",month:"long",year:"numeric"}) : "";
+function renderCard(e) {
+  const date = e.event_date
+    ? new Date(e.event_date).toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" })
+    : "No date set";
+  const n = e.name.replace(/'/g, "\\'");
   return `
   <div class="event-card">
-    <div class="event-card-body">
-      <div class="event-name">${e.name}</div>
-      <div class="event-meta">${e.couple_names || ""}${date ? " · " + date : ""}</div>
-      <div class="event-slug">/${e.slug}</div>
-      <div class="event-actions">
-        <button class="btn btn-outline btn-sm" onclick="showQR('${e.slug}','${e.name.replace(/'/g,"\\'")}')">QR Code</button>
-        <a href="/event/${e.slug}/owner" class="btn btn-primary btn-sm">View photos</a>
-        <button class="btn btn-danger btn-sm" onclick="deleteEvent('${e.slug}','${e.name.replace(/'/g,"\\'")}')">Delete</button>
-      </div>
-      <div class="photo-count">${e.photo_count} photo${e.photo_count !== 1 ? "s" : ""} uploaded</div>
+    <div class="ec-body">
+      <div class="ec-date">${date}</div>
+      <div class="ec-name">${e.name}</div>
+      <div class="ec-hosts">${e.couple_names || ""}</div>
+      <span class="ec-count">${e.photo_count} upload${e.photo_count !== 1 ? "s" : ""}</span>
+    </div>
+    <div class="ec-footer">
+      <a href="/event/${e.slug}/owner" class="ec-btn ec-btn-dark">Gallery</a>
+      <button class="ec-btn ec-btn-outline" onclick="showQR('${e.slug}','${n}')">QR Code</button>
+      <button class="ec-btn ec-btn-del" onclick="deleteEvent('${e.slug}','${n}')">Delete</button>
     </div>
   </div>`;
 }
 
 async function createEvent() {
-  const name = document.getElementById("new-name").value.trim();
-  const couple = document.getElementById("new-couple").value.trim();
-  const date = document.getElementById("new-date").value;
+  const name    = document.getElementById("new-name").value.trim();
+  const couple  = document.getElementById("new-couple").value.trim();
+  const date    = document.getElementById("new-date").value;
+  const welcome = document.getElementById("new-welcome").value.trim();
+  const tagline = document.getElementById("new-tagline").value.trim();
   if (!name) { toast("Please enter an event name", "error"); return; }
   const res = await fetch("/api/events", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, couple_names: couple, event_date: date })
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, couple_names: couple, event_date: date, welcome_message: welcome, welcome_tagline: tagline })
   });
   const data = await res.json();
   if (res.ok) {
     toast("Event created!", "success");
-    document.getElementById("new-name").value = "";
-    document.getElementById("new-couple").value = "";
-    document.getElementById("new-date").value = "";
+    ["new-name","new-couple","new-date","new-welcome","new-tagline"].forEach(id => document.getElementById(id).value = "");
     loadEvents();
   } else { toast(data.error || "Failed to create", "error"); }
 }
 
+async function joinEvent() {
+  const slug = document.getElementById("join-slug").value.trim();
+  const code = document.getElementById("join-code").value.trim().toUpperCase();
+  if (!slug || !code) { toast("Enter both the slug and access code", "error"); return; }
+  const res = await fetch("/api/events/join", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slug, access_code: code })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    toast("Joined event!", "success");
+    document.getElementById("join-slug").value = "";
+    document.getElementById("join-code").value = "";
+    loadEvents();
+  } else { toast(data.error || "Could not join event", "error"); }
+}
+
 function showQR(slug, name) {
-  currentQrSlug = slug;
-  document.getElementById("qr-event-name").textContent = name;
+  currentSlug = slug;
+  document.getElementById("qr-name").textContent = name;
   document.getElementById("qr-img").src = `/api/events/${slug}/qr?t=${Date.now()}`;
-  document.getElementById("qr-download").href = `/api/events/${slug}/qr`;
-  document.getElementById("qr-download").download = `${slug}-qr.png`;
+  document.getElementById("qr-dl").href = `/api/events/${slug}/qr`;
+  document.getElementById("qr-dl").download = `${slug}-qr.png`;
   document.getElementById("qr-modal").classList.add("open");
 }
-
 function closeQR(e) {
-  if (e.target === document.getElementById("qr-modal")) {
+  if (e.target === document.getElementById("qr-modal"))
     document.getElementById("qr-modal").classList.remove("open");
-  }
 }
-
 function copyLink() {
-  const url = `${location.origin}/event/${currentQrSlug}`;
-  navigator.clipboard.writeText(url).then(() => toast("Link copied!")).catch(() => {
-    prompt("Copy this link:", url);
-  });
+  const url = `${location.origin}/event/${currentSlug}`;
+  navigator.clipboard.writeText(url).then(() => toast("Link copied!")).catch(() => prompt("Copy this link:", url));
 }
-
 async function deleteEvent(slug, name) {
-  if (!confirm(`Delete "${name}" and ALL its photos? This cannot be undone.`)) return;
+  if (!confirm(`Delete "${name}" and all its uploads? This cannot be undone.`)) return;
   const res = await fetch(`/api/events/${slug}`, { method: "DELETE" });
   if (res.ok) { toast("Event deleted", "success"); loadEvents(); }
   else { toast("Failed to delete", "error"); }

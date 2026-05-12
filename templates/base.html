@@ -5,134 +5,97 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}GatherPix{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --cream:   #faf8f4;
-      --warm:    #f3ede3;
-      --blush:   #e8cfc4;
-      --rose:    #c9856a;
-      --rose-dk: #a4634c;
-      --ink:     #1c1412;
-      --ink-lt:  #4a3c38;
-      --muted:   #8c7b76;
-      --white:   #ffffff;
-      --border:  rgba(180,140,120,0.18);
-      --shadow:  0 4px 32px rgba(100,60,40,0.08);
-      --r:       12px;
+      --bg:       #f5f0eb;
+      --surface:  #ffffff;
+      --ink:      #1a1410;
+      --ink2:     #3d3028;
+      --sub:      #6b5c52;
+      --border:   #ddd5cc;
+      --accent:   #8b5e3c;
+      --accent2:  #6b4a2e;
     }
 
     html { font-size: 16px; scroll-behavior: smooth; }
 
     body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--cream);
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
       color: var(--ink);
       min-height: 100vh;
-      line-height: 1.65;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
-
-    h1, h2, h3, .serif { font-family: 'Cormorant Garamond', serif; }
 
     /* ── Nav ── */
     nav {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(250,248,244,0.88);
-      backdrop-filter: blur(12px);
+      background: rgba(245,240,235,0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--border);
-      padding: 0 2rem;
+      padding: 0 1.5rem;
       display: flex; align-items: center; justify-content: space-between;
-      height: 60px;
+      height: 56px;
     }
     .nav-brand {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.4rem; font-weight: 600;
+      font-size: 1.3rem; font-weight: 500;
       color: var(--ink); text-decoration: none;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.01em;
     }
-    .nav-brand span { color: var(--rose); }
-    .nav-links { display: flex; gap: 1rem; align-items: center; }
-    .nav-links a { font-size: 0.85rem; color: var(--ink-lt); text-decoration: none; }
-    .nav-links a:hover { color: var(--rose); }
-
-    /* ── Buttons ── */
-    .btn {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      padding: 0.55rem 1.4rem;
-      font-family: 'DM Sans', sans-serif;
+    .nav-brand-mark { color: var(--accent); margin-right: 0.3rem; }
+    .nav-links { display: flex; gap: 0.4rem; align-items: center; }
+    .nav-link {
+      font-size: 0.85rem; color: var(--ink2);
+      text-decoration: none; padding: 0.4rem 0.75rem;
+      border-radius: 6px; transition: background 0.15s;
+      font-weight: 400;
+    }
+    .nav-link:hover { background: var(--border); color: var(--ink); }
+    .nav-cta {
       font-size: 0.85rem; font-weight: 500;
-      border-radius: 40px; cursor: pointer;
-      transition: all 0.2s; border: none; text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      padding: 0.45rem 1rem;
+      border-radius: 6px; cursor: pointer;
+      text-decoration: none; border: none;
+      background: var(--ink); color: #fff;
+      transition: background 0.15s;
     }
-    .btn-primary {
-      background: var(--rose); color: white;
-    }
-    .btn-primary:hover { background: var(--rose-dk); transform: translateY(-1px); }
-    .btn-outline {
-      background: transparent; color: var(--ink);
-      border: 1px solid var(--border);
-    }
-    .btn-outline:hover { border-color: var(--rose); color: var(--rose); }
-    .btn-danger { background: #c0392b; color: white; }
-    .btn-danger:hover { background: #a93226; }
-    .btn-sm { padding: 0.35rem 0.9rem; font-size: 0.78rem; }
-
-    /* ── Cards ── */
-    .card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      box-shadow: var(--shadow);
-    }
-
-    /* ── Forms ── */
-    .form-group { margin-bottom: 1.2rem; }
-    label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
-    input[type=text], input[type=email], input[type=password], input[type=date] {
-      width: 100%; padding: 0.65rem 1rem;
-      border: 1px solid var(--border); border-radius: 8px;
-      font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
-      background: var(--cream); color: var(--ink);
-      transition: border-color 0.2s;
-      outline: none;
-    }
-    input:focus { border-color: var(--rose); background: var(--white); }
+    .nav-cta:hover { background: var(--ink2); }
+    @media (max-width: 500px) { nav { padding: 0 1rem; } }
 
     /* ── Toast ── */
     #toast {
-      position: fixed; bottom: 2rem; right: 2rem; z-index: 9999;
-      padding: 0.8rem 1.4rem; border-radius: 40px;
+      position: fixed; bottom: 1.5rem; left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      z-index: 9999;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
       font-size: 0.85rem; font-weight: 500;
-      background: var(--ink); color: white;
-      opacity: 0; transform: translateY(8px);
-      transition: all 0.3s; pointer-events: none;
+      background: var(--ink); color: #fff;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
     }
-    #toast.show { opacity: 1; transform: translateY(0); }
-    #toast.success { background: #27ae60; }
-    #toast.error { background: #c0392b; }
-
-    /* ── Utility ── */
-    .text-muted { color: var(--muted); }
-    .text-center { text-align: center; }
-    .mt-1 { margin-top: 0.5rem; }
-    .mt-2 { margin-top: 1rem; }
-    .mt-3 { margin-top: 1.5rem; }
-    .mt-4 { margin-top: 2rem; }
-
-    @media (max-width: 600px) {
-      nav { padding: 0 1rem; }
-    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.success { background: #2d6a4f; }
+    #toast.error   { background: #7c2020; }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
 <body>
   <nav>
-    <a class="nav-brand" href="/"><span>✦</span> GatherPix</a>
+    <a class="nav-brand" href="/"><span class="nav-brand-mark">✦</span>GatherPix</a>
     <div class="nav-links" id="nav-links">
-      <a href="/login" id="nav-login">Log in</a>
-      <a href="/register" class="btn btn-primary btn-sm" id="nav-register">Create event</a>
+      <a href="/login" class="nav-link">Log in</a>
+      <a href="/register" class="nav-cta">Create event</a>
     </div>
   </nav>
 
@@ -145,18 +108,15 @@
       const t = document.getElementById("toast");
       t.textContent = msg;
       t.className = "show " + type;
-      setTimeout(() => t.className = "", 3000);
+      setTimeout(() => t.className = "", 3200);
     }
-
     async function checkAuth() {
-      const res = await fetch("/api/me");
-      const data = await res.json();
+      const data = await fetch("/api/me").then(r => r.json());
       const nav = document.getElementById("nav-links");
       if (data.authenticated) {
         nav.innerHTML = `
-          <a href="/dashboard">Dashboard</a>
-          <button class="btn btn-outline btn-sm" onclick="logout()">Log out</button>
-        `;
+          <a href="/dashboard" class="nav-link">Dashboard</a>
+          <button class="nav-cta" style="cursor:pointer;border:none" onclick="logout()">Log out</button>`;
       }
     }
     async function logout() {

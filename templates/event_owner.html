@@ -1,111 +1,214 @@
 {% extends "base.html" %}
-{% block title %}{{ event.name }} — Owner View{% endblock %}
+{% block title %}{{ event.name }} — Gallery{% endblock %}
 
 {% block extra_head %}
 <style>
-  .owner-hero {
+  /* ── Hero ── */
+  .gallery-hero {
     background: var(--ink);
-    color: white;
-    padding: 2.5rem 2rem 2rem;
+    padding: 2rem 1.5rem;
   }
-  .owner-hero-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
-  .owner-hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 300; color: white; }
-  .owner-hero p { color: rgba(255,255,255,0.55); font-size: 0.85rem; margin-top: 0.25rem; }
-  .owner-hero-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-  .btn-ghost { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.15); }
-  .btn-ghost:hover { background: rgba(255,255,255,0.18); }
+  .gallery-hero-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem;
+  }
+  .hero-left {}
+  .hero-tag {
+    font-size: 0.72rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 0.35rem;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 400; color: #fff;
+    line-height: 1.1;
+  }
+  .hero-meta { font-size: 0.82rem; color: rgba(255,255,255,0.55); margin-top: 0.3rem; }
+  .hero-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .hero-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.82rem; font-weight: 500;
+    cursor: pointer; text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    transition: background 0.15s;
+    display: inline-flex; align-items: center; gap: 0.35rem;
+  }
+  .hero-btn:hover { background: rgba(255,255,255,0.15); }
 
-  .gallery-wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
-  .gallery-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem; }
-  .gallery-count { font-size: 0.85rem; color: var(--muted); }
+  /* ── Gallery ── */
+  .gallery-wrap {
+    max-width: 1100px; margin: 0 auto;
+    padding: 2rem 1.5rem 5rem;
+  }
+  .toolbar {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;
+  }
+  .toolbar-count { font-size: 0.85rem; color: var(--ink2); font-weight: 500; }
+  .toolbar-btn {
+    padding: 0.42rem 0.9rem;
+    border-radius: 6px; font-size: 0.8rem; font-weight: 500;
+    cursor: pointer; background: var(--surface);
+    color: var(--ink); border: 1.5px solid var(--border);
+    transition: border-color 0.15s;
+  }
+  .toolbar-btn:hover { border-color: var(--accent); }
 
-  /* ── Masonry-style grid ── */
+  /* ── Grid ── */
   .photo-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 0.75rem;
   }
   .photo-card {
-    background: var(--white);
+    background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    position: relative;
-    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 8px; overflow: hidden;
+    transition: box-shadow 0.2s;
   }
-  .photo-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(100,60,40,0.12); }
-  .photo-card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; cursor: zoom-in; }
-  .photo-card-footer { padding: 0.6rem 0.75rem; display: flex; align-items: center; justify-content: space-between; }
-  .photo-uploader { font-size: 0.75rem; color: var(--muted); }
-  .photo-actions { display: flex; gap: 0.3rem; }
+  .photo-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .photo-card-media {
+    width: 100%; aspect-ratio: 1;
+    object-fit: cover; display: block;
+    cursor: pointer; background: var(--bg);
+  }
+  .photo-card-foot {
+    padding: 0.6rem 0.8rem;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--border);
+  }
+  .photo-name { font-size: 0.78rem; color: var(--ink2); font-weight: 500; }
+  .photo-btns { display: flex; gap: 0.3rem; }
   .icon-btn {
-    width: 28px; height: 28px; border-radius: 6px;
-    background: var(--cream); border: none; cursor: pointer;
-    font-size: 14px; display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s;
+    width: 28px; height: 28px; border-radius: 5px;
+    background: var(--bg); border: none; cursor: pointer;
+    font-size: 13px; display: flex; align-items: center; justify-content: center;
+    color: var(--ink2); transition: background 0.15s;
   }
-  .icon-btn:hover { background: var(--blush); }
-  .icon-btn.del:hover { background: #f5c6c6; }
+  .icon-btn:hover { background: var(--border); color: var(--ink); }
+  .icon-btn.del:hover { background: #fdf0f0; color: #7c2020; }
 
   /* ── Lightbox ── */
   .lightbox {
     position: fixed; inset: 0; z-index: 600;
-    background: rgba(0,0,0,0.9);
+    background: rgba(26,20,16,0.95);
     display: none; align-items: center; justify-content: center;
     padding: 1rem;
   }
   .lightbox.open { display: flex; }
-  .lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 4px; }
+  .lightbox img, .lightbox video {
+    max-width: 90vw; max-height: 90vh;
+    object-fit: contain; border-radius: 4px;
+  }
   .lb-close {
     position: fixed; top: 1rem; right: 1.25rem;
-    font-size: 2rem; color: white; cursor: pointer;
-    background: none; border: none; line-height: 1;
-    opacity: 0.7;
+    font-size: 1.8rem; color: rgba(255,255,255,0.7);
+    cursor: pointer; background: none; border: none;
+    transition: color 0.15s;
   }
-  .lb-close:hover { opacity: 1; }
+  .lb-close:hover { color: #fff; }
   .lb-nav {
     position: fixed; top: 50%; transform: translateY(-50%);
-    background: rgba(255,255,255,0.1); border: none;
-    color: white; font-size: 1.5rem; cursor: pointer;
-    width: 48px; height: 48px; border-radius: 50%;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; font-size: 1.4rem; cursor: pointer;
+    width: 42px; height: 42px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
   }
+  .lb-nav:hover { background: rgba(255,255,255,0.2); }
   .lb-prev { left: 1rem; }
   .lb-next { right: 1rem; }
-  .lb-info { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.6); font-size: 0.8rem; text-align: center; }
+  .lb-info {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0.55); font-size: 0.78rem; text-align: center;
+    white-space: nowrap;
+  }
 
-  .empty-state { text-align: center; padding: 5rem 1rem; color: var(--muted); }
-  .empty-state h3 { font-size: 1.5rem; font-weight: 300; margin-bottom: 0.5rem; }
+  /* ── QR Modal ── */
+  .modal-bg {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(26,20,16,0.5);
+    display: none; align-items: center; justify-content: center; padding: 1rem;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 12px;
+    padding: 2rem; max-width: 320px; width: 100%;
+    text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .modal h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 400;
+    color: var(--ink); margin-bottom: 0.25rem;
+  }
+  .modal p { font-size: 0.82rem; color: var(--ink2); margin-bottom: 1.25rem; }
+  .modal img { width: 190px; height: 190px; border-radius: 6px; border: 1px solid var(--border); }
+  .modal-copy {
+    display: block; margin-top: 0.75rem;
+    font-size: 0.8rem; color: var(--accent);
+    cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+  }
+  .modal-actions { display: flex; gap: 0.6rem; justify-content: center; margin-top: 1.25rem; }
+  .modal-btn {
+    padding: 0.5rem 1.1rem; border-radius: 6px;
+    font-size: 0.82rem; font-weight: 500;
+    cursor: pointer; text-decoration: none; border: none; transition: all 0.15s;
+  }
+  .modal-btn-dark { background: var(--ink); color: #fff; }
+  .modal-btn-dark:hover { background: var(--ink2); }
+  .modal-btn-outline { background: transparent; color: var(--ink); border: 1.5px solid var(--border); }
+  .modal-btn-outline:hover { border-color: var(--accent); }
+
+  /* ── Empty ── */
+  .empty {
+    text-align: center; padding: 5rem 1rem;
+    grid-column: 1 / -1;
+  }
+  .empty h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem; font-weight: 400;
+    color: var(--ink); margin-bottom: 0.5rem;
+  }
+  .empty p { font-size: 0.88rem; color: var(--ink2); }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="owner-hero">
-  <div class="owner-hero-inner">
-    <div>
-      <h1 class="serif">{{ event.name }}</h1>
-      <p>
-        Owner view · {{ event.couple_names or "" }}
-        {% if event.event_date %} · {{ event.event_date }}{% endif %}
-      </p>
+
+<div class="gallery-hero">
+  <div class="gallery-hero-inner">
+    <div class="hero-left">
+      <div class="hero-tag">Owner view</div>
+      <div class="hero-title">{{ event.name }}</div>
+      <div class="hero-meta">
+        {% if event.couple_names %}{{ event.couple_names }}{% endif %}
+        {% if event.couple_names and event.event_date %} · {% endif %}
+        {% if event.event_date %}{{ event.event_date }}{% endif %}
+      </div>
     </div>
-    <div class="owner-hero-actions">
-      <button class="btn btn-ghost btn-sm" onclick="showQR()">QR Code</button>
-      <a href="/api/events/{{ event_slug }}/photos/download-all" class="btn btn-ghost btn-sm">Download all</a>
-      <a href="/dashboard" class="btn btn-ghost btn-sm">← Dashboard</a>
+    <div class="hero-actions">
+      <button class="hero-btn" onclick="showQR()">QR Code</button>
+      <a href="/api/events/{{ event_slug }}/photos/download-all" class="hero-btn">Download all</a>
+      <a href="/dashboard" class="hero-btn">← Dashboard</a>
     </div>
   </div>
 </div>
 
 <div class="gallery-wrap">
-  <div class="gallery-toolbar">
-    <span class="gallery-count" id="photo-count">Loading…</span>
-    <button class="btn btn-outline btn-sm" onclick="loadPhotos()">Refresh</button>
+  <div class="toolbar">
+    <span class="toolbar-count" id="photo-count">Loading…</span>
+    <button class="toolbar-btn" onclick="loadPhotos()">Refresh</button>
   </div>
   <div class="photo-grid" id="photo-grid">
-    <div class="empty-state" style="grid-column:1/-1">
-      <h3 class="serif">Loading photos…</h3>
-    </div>
+    <div class="empty"><h3>Loading…</h3></div>
   </div>
 </div>
 
@@ -113,78 +216,85 @@
 <div class="lightbox" id="lightbox" onclick="closeLB(event)">
   <button class="lb-close" onclick="document.getElementById('lightbox').classList.remove('open')">×</button>
   <button class="lb-nav lb-prev" onclick="navLB(-1)">‹</button>
-  <img id="lb-img" src="" alt="Photo" />
+  <img id="lb-img" src="" alt="" />
   <button class="lb-nav lb-next" onclick="navLB(1)">›</button>
   <div class="lb-info" id="lb-info"></div>
 </div>
 
 <!-- QR Modal -->
-<div class="modal-overlay" id="qr-modal" onclick="closeQRModal(event)" style="position:fixed;inset:0;z-index:500;background:rgba(28,20,18,0.6);display:none;align-items:center;justify-content:center;padding:1rem">
-  <div style="background:var(--white);border-radius:var(--r);padding:2.5rem;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2)">
-    <h2 class="serif" style="font-size:1.4rem;margin-bottom:0.3rem;font-weight:300">Event QR Code</h2>
-    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.5rem">Guests scan to upload photos</p>
-    <img id="qr-img" src="" alt="QR Code" style="width:220px;height:220px;border-radius:8px;border:1px solid var(--border)" />
-    <br/>
-    <span style="font-size:0.75rem;color:var(--rose);cursor:pointer;display:inline-block;margin-top:0.75rem" onclick="copyLink()">Copy event link</span>
-    <div style="display:flex;gap:0.75rem;justify-content:center;margin-top:1.2rem;flex-wrap:wrap">
-      <a id="qr-dl" class="btn btn-primary" download>Download QR</a>
-      <button class="btn btn-outline" onclick="document.getElementById('qr-modal').style.display='none'">Close</button>
+<div class="modal-bg" id="qr-modal" onclick="closeQRModal(event)">
+  <div class="modal">
+    <h2>{{ event.name }}</h2>
+    <p>Guests scan this to upload photos</p>
+    <img id="qr-img" src="" alt="QR Code" />
+    <span class="modal-copy" onclick="copyLink()">Copy guest link</span>
+    <div class="modal-actions">
+      <a id="qr-dl" class="modal-btn modal-btn-dark" download>Download</a>
+      <button class="modal-btn modal-btn-outline" onclick="document.getElementById('qr-modal').classList.remove('open')">Close</button>
     </div>
   </div>
 </div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
 const SLUG = "{{ event_slug }}";
-let photos = [];
-let lbIdx = 0;
+let photos = [], lbIdx = 0;
 
 async function loadPhotos() {
   const res = await fetch(`/api/events/${SLUG}/photos`);
   if (res.status === 401) { location.href = "/login"; return; }
   photos = await res.json();
   const grid = document.getElementById("photo-grid");
-  document.getElementById("photo-count").textContent = `${photos.length} photo${photos.length !== 1 ? "s" : ""}`;
-  if (photos.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><h3 class="serif">No photos yet</h3><p>Share your QR code so guests can start uploading.</p></div>`;
+  document.getElementById("photo-count").textContent = `${photos.length} upload${photos.length !== 1 ? "s" : ""}`;
+  if (!photos.length) {
+    grid.innerHTML = `<div class="empty"><h3>No uploads yet</h3><p>Share your QR code so guests can start uploading.</p></div>`;
     return;
   }
-  grid.innerHTML = photos.map((p, i) => `
+  grid.innerHTML = photos.map((p, i) => {
+    const isVid = p.resource_type === "video";
+    const media = isVid
+      ? `<video class="photo-card-media" src="${p.image_url}" onclick="openLB(${i})" muted playsinline></video>`
+      : `<img class="photo-card-media" src="${p.image_url}" loading="lazy" onclick="openLB(${i})" alt="${p.uploader_name}" />`;
+    return `
     <div class="photo-card" id="pc-${p.id}">
-      <img src="${p.image_url}" loading="lazy" onclick="openLB(${i})" alt="Photo by ${p.uploader_name}" />
-      <div class="photo-card-footer">
-        <span class="photo-uploader">${p.uploader_name}</span>
-        <div class="photo-actions">
-          <button class="icon-btn" title="Download" onclick="dlPhoto('${p.image_url}', ${p.id})">⬇</button>
-          <button class="icon-btn del" title="Delete" onclick="deletePhoto(${p.id})">🗑</button>
+      ${media}
+      <div class="photo-card-foot">
+        <span class="photo-name">${p.uploader_name}</span>
+        <div class="photo-btns">
+          <button class="icon-btn" title="Download" onclick="dlPhoto('${p.image_url}',${p.id})">↓</button>
+          <button class="icon-btn del" title="Delete" onclick="deletePhoto(${p.id})">×</button>
         </div>
       </div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
 
-function openLB(idx) {
-  lbIdx = idx;
-  updateLB();
-  document.getElementById("lightbox").classList.add("open");
-}
+function openLB(idx) { lbIdx = idx; updateLB(); document.getElementById("lightbox").classList.add("open"); }
 
 function updateLB() {
   const p = photos[lbIdx];
-  document.getElementById("lb-img").src = p.image_url;
-  document.getElementById("lb-info").textContent = `${p.uploader_name} · ${new Date(p.upload_timestamp).toLocaleDateString()} · ${lbIdx + 1} / ${photos.length}`;
-}
-
-function navLB(dir) {
-  lbIdx = (lbIdx + dir + photos.length) % photos.length;
-  updateLB();
-}
-
-function closeLB(e) {
-  if (e.target === document.getElementById("lightbox")) {
-    document.getElementById("lightbox").classList.remove("open");
+  const img = document.getElementById("lb-img");
+  let vid = document.getElementById("lb-video");
+  if (p.resource_type === "video") {
+    img.style.display = "none";
+    if (!vid) {
+      vid = document.createElement("video"); vid.id = "lb-video"; vid.controls = true;
+      vid.style.cssText = "max-width:90vw;max-height:90vh;border-radius:4px";
+      img.parentNode.insertBefore(vid, img);
+    }
+    vid.src = p.image_url; vid.style.display = "block";
+  } else {
+    if (vid) { vid.pause(); vid.style.display = "none"; }
+    img.src = p.image_url; img.style.display = "block";
   }
+  document.getElementById("lb-info").textContent =
+    `${p.uploader_name} · ${new Date(p.upload_timestamp).toLocaleDateString()} · ${lbIdx + 1} / ${photos.length}`;
 }
+
+function navLB(dir) { lbIdx = (lbIdx + dir + photos.length) % photos.length; updateLB(); }
+function closeLB(e) { if (e.target === document.getElementById("lightbox")) document.getElementById("lightbox").classList.remove("open"); }
 
 document.addEventListener("keydown", e => {
   if (!document.getElementById("lightbox").classList.contains("open")) return;
@@ -194,32 +304,23 @@ document.addEventListener("keydown", e => {
 });
 
 async function deletePhoto(id) {
-  if (!confirm("Delete this photo permanently?")) return;
+  if (!confirm("Delete this permanently?")) return;
   const res = await fetch(`/api/events/${SLUG}/photos/${id}`, { method: "DELETE" });
-  if (res.ok) {
-    toast("Photo deleted", "success");
-    loadPhotos();
-  } else { toast("Failed to delete", "error"); }
+  if (res.ok) { toast("Deleted", "success"); loadPhotos(); }
+  else { toast("Failed to delete", "error"); }
 }
 
 function dlPhoto(url, id) {
-  const a = document.createElement("a");
-  a.href = url; a.download = `photo-${id}.jpg`;
-  a.target = "_blank"; a.click();
+  const a = document.createElement("a"); a.href = url; a.download = `photo-${id}.jpg`; a.target = "_blank"; a.click();
 }
 
 function showQR() {
   document.getElementById("qr-img").src = `/api/events/${SLUG}/qr?t=${Date.now()}`;
   document.getElementById("qr-dl").href = `/api/events/${SLUG}/qr`;
   document.getElementById("qr-dl").download = `${SLUG}-qr.png`;
-  document.getElementById("qr-modal").style.display = "flex";
+  document.getElementById("qr-modal").classList.add("open");
 }
-
-function closeQRModal(e) {
-  if (e.target === document.getElementById("qr-modal"))
-    document.getElementById("qr-modal").style.display = "none";
-}
-
+function closeQRModal(e) { if (e.target === document.getElementById("qr-modal")) document.getElementById("qr-modal").classList.remove("open"); }
 function copyLink() {
   const url = `${location.origin}/event/${SLUG}`;
   navigator.clipboard.writeText(url).then(() => toast("Link copied!")).catch(() => prompt("Copy link:", url));
