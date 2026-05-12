@@ -242,7 +242,7 @@
           <input type="text" id="new-tagline" placeholder="Share your favourite moments from today" maxlength="255" />
         </div>
       </div>
-      <button class="btn-create" onclick="createEvent()">Create event →</button>
+      <button class="btn-create" onclick="submitCreateEvent()">Create event →</button>
     </div>
   </div>
 
@@ -332,7 +332,7 @@ function renderCard(e) {
   </div>`;
 }
 
-async function createEvent() {
+async function submitCreateEvent() {
   const name    = document.getElementById("new-name").value.trim();
   const couple  = document.getElementById("new-couple").value.trim();
   const date    = document.getElementById("new-date").value;
