@@ -52,7 +52,8 @@ def get_db():
         password=os.getenv("DB_PASSWORD", ""),
         database=os.getenv("DB_NAME", "wedding_app"),
         port=int(os.getenv("DB_PORT", "5432")),
-        ssl_context=ssl_context
+        ssl_context=ssl_context,
+        timeout=10
     )
 
 def row_to_dict(cursor, row):
